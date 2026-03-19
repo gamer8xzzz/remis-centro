@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel del Cliente</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2><i class="bi bi-person-bounding-box me-2"></i>Mis solicitudes</h2>
+      <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">
+        <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+      </a>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          {{ messages[0] }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">
+        <i class="bi bi-geo-alt-fill me-2"></i>Solicitar nuevo viaje
+      </div>
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('solicitar') }}">
+          <div class="mb-3">
+            <label for="lugar" class="form-label">Dirección de destino</label>
+            <input type="text" name="lugar" id="lugar" class="form-control" placeholder="Ej: Av. Belgrano 123" required>
+          </div>
+          <button type="submit" class="btn btn-success w-100">
+            <i class="bi bi-send-check me-1"></i>Solicitar viaje
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <h4 class="mb-3">📋 Historial de solicitudes</h4>
+    {% if solicitudes %}
+      <ul class="list-group">
+        {% for s in solicitudes %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <strong>{{ s.fecha }} {{ s.hora }}</strong><br>
+              Dirección: {{ s.lugar }}<br>
+              Estado:
+              {% if s.asignado %}
+                <span class="badge bg-success">Asignado</span>
+                <br>Unidad: <strong>{{ s.movil_asignado }}</strong>
+              {% else %}
+                <span class="badge bg-warning text-dark">Pendiente</span>
+              {% endif %}
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="alert alert-info">Todavía no hiciste ninguna solicitud.</div>
+    {% endif %}
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remis Centro | Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --sidebar-width: 260px; --primary-dark: #1a1d20; }
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        /* Sidebar */
+        .sidebar { width: var(--sidebar-width); height: 100vh; position: fixed; background: var(--primary-dark); color: white; transition: all 0.3s; z-index: 1000; }
+        .main-content { margin-left: var(--sidebar-width); padding: 20px; }
+        .nav-link { color: #adb5bd; padding: 12px 20px; border-radius: 0; transition: 0.2s; }
+        .nav-link:hover, .nav-link.active { background: #343a40; color: #fff; border-left: 4px solid #0d6efd; }
+
+        /* Buscador de Planillas en Sidebar */
+        .search-box { background: rgba(255,255,255,0.05); border-radius: 10px; padding: 15px; margin: 10px; border: 1px solid rgba(255,255,255,0.1); }
+
+        /* Cards & Tables */
+        .stats-card { border: none; border-radius: 12px; transition: transform 0.2s; }
+        .table-container { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .btn-primary { border-radius: 10px; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar d-flex flex-column">
+        <div class="p-4 text-center">
+            <h4 class="fw-bold mb-0 text-white"><i class="fas fa-taxi me-2 text-warning"></i>REMIS CENTRO</h4>
+            <small class="text-muted text-uppercase" style="font-size: 0.7rem; letter-spacing: 1px;">Gestión de Base</small>
+        </div>
+
+        <nav class="nav flex-column mt-2">
+            <a class="nav-link active" href="{{ url_for('panel_admin') }}"><i class="fas fa-home me-2"></i> Inicio</a>
+            <a class="nav-link" href="{{ url_for('ver_desocupados') }}"><i class="fas fa-check-circle me-2"></i> Desocupados</a>
+            
+            <div class="search-box mt-3">
+                <label class="form-label text-white-50 small fw-bold mb-2">VER PLANILLA POR MÓVIL</label>
+                <form action="{{ url_for('ver_planillas') }}" method="GET" class="d-flex">
+                    <input type="number" name="movil" class="form-control form-control-sm me-2 bg-dark text-white border-secondary" placeholder="N° Móvil" required>
+                    <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-search"></i></button>
+                </form>
+            </div>
+
+            <hr class="mx-3 opacity-25">
+            <a class="nav-link text-danger mt-auto" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión</a>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <div class="row mb-4 align-items-center">
+            <div class="col-md-8">
+                <h2 class="fw-bold text-dark mb-0">Bienvenido, {{ current_user.nombre }}</h2>
+                <p class="text-muted">Control operativo de viajes</p>
+            </div>
+            <div class="col-md-2">
+                <div class="card stats-card bg-primary text-white p-3 text-center shadow-sm">
+                    <small class="text-uppercase" style="font-size: 0.7rem;">En Viaje</small>
+                    <h3 class="mb-0 fw-bold">{{ viajes|length }}</h3>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card stats-card bg-success text-white p-3 text-center shadow-sm">
+                    <small class="text-uppercase" style="font-size: 0.7rem;">Finalizados</small>
+                    <h3 class="mb-0 fw-bold">HOY</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4 text-dark"><i class="fas fa-plus-circle me-2 text-primary"></i>Nuevo Viaje</h5>
+                        <form action="{{ url_for('registrar') }}" method="POST">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">MÓVIL ASIGNADO</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-0"><i class="fas fa-hashtag text-primary"></i></span>
+                                    <input type="number" name="movil" class="form-control bg-light border-0" placeholder="Ej: 05" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">APELLIDO DEL CLIENTE</label>
+                                <input type="text" name="apellido" class="form-control bg-light border-0" placeholder="Ej: García" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">PUNTO DE SALIDA (ORIGEN)</label>
+                                <textarea name="lugar" class="form-control bg-light border-0" rows="2" placeholder="Dirección del cliente" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow-sm">
+                                INICIAR VIAJE <i class="fas fa-paper-plane ms-2"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="table-container shadow-sm border-0">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold mb-0 text-dark">Vehículos en Tránsito</h5>
+                        <button class="btn btn-sm btn-light border" onclick="location.reload()"><i class="fas fa-sync-alt me-1"></i> Actualizar</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="bg-light">
+                                <tr class="text-muted small">
+                                    <th class="border-0">HORA</th>
+                                    <th class="border-0">MÓVIL</th>
+                                    <th class="border-0">CLIENTE</th>
+                                    <th class="border-0">ORIGEN</th>
+                                    <th class="border-0 text-end">ACCIÓN</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for v in viajes %}
+                                <tr>
+                                    <td><span class="badge bg-light text-dark border fw-normal px-2 py-2">{{ v.fecha.strftime('%H:%M') }}</span></td>
+                                    <td><span class="fw-bold text-primary fs-5">#{{ v.movil }}</span></td>
+                                    <td>{{ v.apellido }}</td>
+                                    <td><small class="text-muted d-block" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ v.lugar }}</small></td>
+                                    <td class="text-end">
+                                        <a href="{{ url_for('ver_desocupados') }}" class="btn btn-sm btn-success rounded-pill px-4 fw-bold">
+                                            Finalizar <i class="fas fa-chevron-right ms-1"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        
+                        {% if not viajes %}
+                        <div class="text-center py-5">
+                            <img src="https://cdn-icons-png.flaticon.com/512/1048/1048314.png" width="80" class="opacity-25 mb-3" alt="sin viajes">
+                            <p class="text-muted fw-bold">No hay móviles circulando ahora</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
